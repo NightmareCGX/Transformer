@@ -1,0 +1,40 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "handmade-transformer"
+version = "0.0.1"
+description = "From-scratch Transformer: minimal, testable, reproducible."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Sijie Pan" }]
+dependencies = ["torch>=2.6.0", "numpy>=2.2.6"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E","F","I"]
+ignore = ["E203","E266","E501"]
+
+[tool.black]
+line-length = 100
+target-version = ["py310"]
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+strict = false
+warn_unused_ignores = true
+warn_redundant_casts = true
+warn_unused_configs = true
+
+[tool.setuptools]
+packages = ["transformer", "tokenizer"]
+
+[tool.pytest.ini_options]
+minversion = "7.0"
+testpaths = ["tests"]
+addopts = "-q"

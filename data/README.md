@@ -1,0 +1,1 @@
+This directory is used to store example data and download scripts.

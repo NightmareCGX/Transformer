@@ -1,0 +1,19 @@
+Metadata-Version: 2.4
+Name: handmade-transformer
+Version: 0.0.1
+Summary: From-scratch Transformer: minimal, testable, reproducible.
+Author: Sijie Pan
+Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+License-File: LICENSE
+Requires-Dist: torch>=2.6.0
+Requires-Dist: numpy>=2.2.6
+Dynamic: license-file
+
+# Transformer from zero to hero
+
+```bash
+conda env create -f environment.yaml
+conda activate transformer_cu126py
+pytest -q
+```

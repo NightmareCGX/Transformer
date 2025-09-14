@@ -1,0 +1,67 @@
+name: transformer_cu126
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - numpy
+  - scipy
+  - pandas
+  - matplotlib
+  - ipykernel
+  - jupyterlab
+  - tqdm
+  - requests
+  - pyyaml
+  - regex
+  - msgpack-python
+  - psutil
+  - uvicorn
+  - fastapi
+
+  - ninja
+  - packaging
+  - setuptools
+  - wheel
+
+  - tensorboard
+  - scikit-learn
+  - seaborn
+  - sacrebleu
+  - nltk
+
+  - pytest
+  - pytest-benchmark
+  - mypy
+  - ruff
+  - black
+  - pre-commit
+  - rich
+
+  - lz4
+  - orjson
+  - pyarrow
+  - datasets
+
+  - pip:
+      - --extra-index-url https://download.pytorch.org/whl/cu126
+      - torch==2.6.0
+      - torchvision==0.21.0
+      - torchaudio==2.6.0
+
+      - einops
+      - sentencepiece
+      - tokenizers>=0.15
+      - tiktoken
+      - accelerate
+      - transformers
+      - bitsandbytes
+      - evaluate
+      - sentencepiece==0.2.0
+
+      - wandb
+      - lightning
+
+      - starlette
+      - pydantic

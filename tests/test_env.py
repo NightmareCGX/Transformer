@@ -3,6 +3,7 @@ def test_imports():
 
     assert importlib.util.find_spec("transformer") is not None
     assert importlib.util.find_spec("tokenizer") is not None
+    assert importlib.util.find_spec("debug") is not None
 
 
 def test_python_version():

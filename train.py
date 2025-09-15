@@ -5,14 +5,9 @@ import torch
 import yaml
 
 from debug.attn_hook_utils import run_and_check
+from transformer.device import resolve_device, setup_global_device
+from transformer.dtype import setup_global_dtype
 from transformer.model import Decoder
-
-
-def resolve_device(device_str: str) -> torch.device:
-    device_str = (device_str or "auto").lower()
-    if device_str in ["auto", "cuda"]:
-        return torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    return torch.device("cpu")
 
 
 def main():
@@ -25,6 +20,9 @@ def main():
     blkcfg = cfg.get("block", {}) or {}
 
     device = resolve_device(str(cfg.get("device", "auto")))
+    setup_global_device(device)
+    dtype = str(cfg.get("dtype", "fp32"))
+    setup_global_dtype(dtype)
     vocab_size = int(cfg.get("model", {}).get("vocab_size", 32000))
     batch = int(mdlcfg.get("batch_size", 4))
     seq_len = int(mdlcfg.get("seq_len", 256))
@@ -38,7 +36,6 @@ def main():
             d_ff=int(mdlcfg.get("d_ff", 2048)),
             n_layer=int(mdlcfg.get("n_layer", 6)),
             max_len=int(mdlcfg.get("max_len", 1024)),
-            device=device,
             norm=blkcfg.get("norm", "prenorm"),
             norm_eps=float(blkcfg.get("norm_eps", 1e-5)),
             attn_bias=bool(blkcfg.get("attn", {}).get("bias", True)),
@@ -53,8 +50,8 @@ def main():
         .eval()
     )
 
-    context = torch.randint(0, vocab_size, (batch, seq_len), device=device)
-    key_padding = torch.zeros(batch, seq_len, dtype=torch.bool, device=device)
+    context = torch.randint(0, vocab_size, (batch, seq_len))
+    key_padding = torch.zeros(batch, seq_len, dtype=torch.bool)
     key_padding[:, -4:] = True
 
     # with torch.no_grad():

@@ -1,4 +1,5 @@
 import math
+from typing import Union
 
 import torch
 import torch.nn as nn
@@ -43,6 +44,7 @@ class MultiHeadSelfAttention(nn.Module):
 class FeedForward(nn.Module):
     def __init__(self, d_model: int, d_ff: int, dropout: float = 0.0, activation: str = "gelu"):
         super().__init__()
+        self.act: Union[nn.GELU, nn.SiLU]
         self.fully_connected1 = nn.Linear(d_model, d_ff)
         if activation.lower() == "gelu":
             self.act = nn.GELU()
@@ -64,7 +66,7 @@ class FeedForward(nn.Module):
         elif self.act_name in ["geglu", "swiglu"]:
             a = self.fully_connected1(x)
             g = self.fc1_g(x)
-            return self.drop(self.fc2(self.act(g) * a))
+            return self.drop(self.fully_connected2(self.act(g) * a))
 
 
 class PreNorm(nn.Module):
@@ -89,6 +91,8 @@ class PreNorm(nn.Module):
         self.norm1 = nn.LayerNorm(d_model, eps=norm_eps)
         self.norm2 = nn.LayerNorm(d_model, eps=norm_eps)
 
+        self.alpha_attn: Union[float, nn.Parameter]
+        self.alpha_ffn: Union[float, nn.Parameter]
         if resid_scale == "1/sqrt(N)":
             self.alpha_attn = 1.0 / math.sqrt(2.0)
             self.alpha_ffn = 1.0 / math.sqrt(2.0)

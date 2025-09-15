@@ -14,7 +14,6 @@ class Decoder(nn.Module):
         d_ff: int,
         n_layer: int,
         max_len: int,
-        device: str | torch.device = "cpu",
         norm: str = "prenorm",
         norm_eps: float = 1e-5,
         attn_bias: bool = True,
@@ -26,9 +25,11 @@ class Decoder(nn.Module):
         block_dropout: float = 0.1,
     ):
         super().__init__()
-        self.token_embedding = nn.Embedding(vocab_size, d_model, device=device)
-        posenc = build_posenc(max_len, d_model, device=device)
+        self.token_embedding = nn.Embedding(vocab_size, d_model)
+        posenc = build_posenc(max_len, d_model)
         self.register_buffer("posenc", posenc, persistent=False)
+        self.posenc: torch.Tensor
+
         if norm.lower() == "prenorm":
             self.layers = nn.ModuleList(
                 [
@@ -43,7 +44,7 @@ class Decoder(nn.Module):
                         ffn_dropout,
                         ffn_activation,
                         resid_scale,
-                    ).to(device)
+                    )
                     for _ in range(n_layer)
                 ]
             )
@@ -52,7 +53,7 @@ class Decoder(nn.Module):
                 [
                     PostNorm(
                         d_model, n_head, d_ff, norm_eps, attn_bias, ffn_activation, block_dropout
-                    ).to(device)
+                    )
                     for _ in range(n_layer)
                 ]
             )
@@ -60,20 +61,15 @@ class Decoder(nn.Module):
             raise ValueError("unknown norm")
 
         self.use_final_ln = norm.lower() == "prenorm"
-        self.final_ln = (
-            nn.LayerNorm(d_model, eps=norm_eps, device=device)
-            if self.use_final_ln
-            else nn.Identity()
-        )
-        self.final_proj = nn.Linear(d_model, vocab_size, bias=False, device=device)
+        self.final_ln = nn.LayerNorm(d_model, eps=norm_eps) if self.use_final_ln else nn.Identity()
+        self.final_proj = nn.Linear(d_model, vocab_size, bias=False)
 
-    def forward(self, context: torch.Tensor, key_padding: torch.Tensor | None = None):
-        B, L = context.shape
-        device = context.device
-        x = self.token_embedding(context) + self.posenc[:, :L, :].to(dtype=context.dtype)
+    def forward(self, idx: torch.Tensor, key_padding: torch.Tensor | None = None):
+        B, L = idx.shape
+        x = self.token_embedding(idx) + self.posenc[:, :L, :].to(dtype=idx.dtype)
 
-        causal = causal_mask(L, device)
-        attn = causal if key_padding is None else causal + padding_mask(key_padding.to(device))
+        causal = causal_mask(L)
+        attn = causal if key_padding is None else causal + padding_mask(key_padding)
 
         for layer in self.layers:
             x = layer(x, attn)

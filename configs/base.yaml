@@ -4,8 +4,12 @@ device: auto # auto | cuda | cuda:0 | mps | cpu
 
 dtype: fp32  # fp32 | fp16 | bf16
 
+dataset:
+  train_path: /home/ezrain/PycharmProjects/Transformer/data/tinyshakespeare/train.npy
+  val_path: /home/ezrain/PycharmProjects/Transformer/data/tinyshakespeare/val.npy
+
 model:
-  vocab_size: 64000
+  vocab_size: 256  #byte-level: 256, subword: 64000
   d_model: 512
   n_head: 8
   d_ff: 2048
@@ -35,5 +39,12 @@ optim:
   weight_decay: 0.1
   betas: [0.9, 0.95]
   grad_clip: 1.0
-  sched: cosine
+  scheduler: noam
+  max_steps: 4000
   warmup_ratio: 0.01
+
+io:
+  out_dir: out/w2_tiny
+  log_interval: 10
+  ckpt_interval: 500
+  keep_last: 5

@@ -66,7 +66,9 @@ class Decoder(nn.Module):
 
     def forward(self, idx: torch.Tensor, key_padding: torch.Tensor | None = None):
         B, L = idx.shape
-        x = self.token_embedding(idx) + self.posenc[:, :L, :].to(dtype=idx.dtype)
+        tok = self.token_embedding(idx)
+        pos = self.posenc[:, :L, :].to(dtype=tok.dtype)
+        x = tok + pos
 
         causal = causal_mask(L)
         attn = causal if key_padding is None else causal + padding_mask(key_padding)
